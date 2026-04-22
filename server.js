@@ -3,8 +3,7 @@ const Database = require('better-sqlite3');
 const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 3000
-app.listen(PORT, () => console.log(`Server running on ${PORT}`));
+const PORT = process.env.PORT || 3000;
 
 // Use /tmp for DB on platforms with ephemeral disk, or local dir
 const dbPath = process.env.DB_PATH || path.join(__dirname, 'calories.db');
