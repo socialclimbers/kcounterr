@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calorie Counter</title>
+<style>
+  :root {
+    --bg: #0f172a; --card: #1e293b; --card2: #334155;
+    --accent: #38bdf8; --accent2: #818cf8; --green: #4ade80; --red: #f87171;
+    --text: #f1f5f9; --muted: #94a3b8; --border: #475569;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg); color: var(--text); min-height: 100vh;
+    display: flex; justify-content: center; padding: 16px;
+  }
+  .container { max-width: 520px; width: 100%; }
+
+  /* Header */
+  .header { text-align: center; padding: 24px 0 16px; }
+  .header h1 { font-size: 1.6rem; font-weight: 700; }
+  .header h1 span { color: var(--accent); }
+  .header .subtitle { color: var(--muted); font-size: 0.85rem; margin-top: 4px; }
+
+  /* Login */
+  .login-card {
+    background: var(--card); border-radius: 16px; padding: 32px;
+    text-align: center; margin-top: 16px;
+  }
+  .login-card h2 { margin-bottom: 16px; font-size: 1.1rem; }
+  .login-card input {
+    width: 100%; padding: 12px 16px; border-radius: 10px;
+    border: 1px solid var(--border); background: var(--card2);
+    color: var(--text); font-size: 1rem; margin-bottom: 12px; outline: none;
+  }
+  .login-card input:focus { border-color: var(--accent); }
+
+  /* Buttons */
+  .btn {
+    padding: 10px 20px; border: none; border-radius: 10px;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-primary { background: var(--accent); color: #0f172a; width: 100%; }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-sm { padding: 6px 12px; font-size: 0.8rem; border-radius: 8px; }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-danger { background: transparent; color: var(--red); }
+  .btn-danger:hover { background: rgba(248,113,113,0.1); }
+
+  /* Top bar */
+  .topbar {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 12px;
+  }
+  .topbar .user-info { display: flex; align-items: center; gap: 8px; }
+  .topbar .avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.85rem; color: #0f172a;
+  }
+  .topbar .name { font-weight: 600; font-size: 0.95rem; }
+
+  /* Date nav */
+  .date-nav {
+    display: flex; align-items: center; justify-content: center;
+    gap: 12px; margin-bottom: 16px;
+  }
+  .date-nav button {
+    background: var(--card2); border: none; color: var(--text);
+    width: 36px; height: 36px; border-radius: 50%; cursor: pointer;
+    font-size: 1.1rem; display: flex; align-items: center; justify-content: center;
+  }
+  .date-nav button:hover { background: var(--border); }
+  .date-nav .date-label { font-weight: 600; font-size: 1rem; min-width: 160px; text-align: center; }
+
+  /* Progress ring */
+  .progress-card {
+    background: var(--card); border-radius: 16px; padding: 24px;
+    text-align: center; margin-bottom: 16px;
+  }
+  .ring-container { position: relative; width: 160px; height: 160px; margin: 0 auto 12px; }
+  .ring-container svg { transform: rotate(-90deg); }
+  .ring-bg { fill: none; stroke: var(--card2); stroke-width: 10; }
+  .ring-fill { fill: none; stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset 0.5s ease, stroke 0.3s; }
+  .ring-text {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    text-align: center;
+  }
+  .ring-text .cal-number { font-size: 2rem; font-weight: 700; }
+  .ring-text .cal-label { color: var(--muted); font-size: 0.8rem; }
+  .goal-row {
+    display: flex; justify-content: center; align-items: center; gap: 8px;
+    margin-top: 8px;
+  }
+  .goal-row label { color: var(--muted); font-size: 0.85rem; }
+  .goal-input {
+    width: 80px; padding: 4px 8px; border-radius: 6px;
+    border: 1px solid var(--border); background: var(--card2);
+    color: var(--text); font-size: 0.85rem; text-align: center; outline: none;
+  }
+  .goal-input:focus { border-color: var(--accent); }
+
+  /* Add form */
+  .add-card {
+    background: var(--card); border-radius: 16px; padding: 16px;
+    margin-bottom: 16px;
+  }
+  .add-card h3 { font-size: 0.95rem; margin-bottom: 12px; }
+  .form-row { display: flex; gap: 8px; margin-bottom: 8px; }
+  .form-row input {
+    flex: 1; padding: 10px 12px; border-radius: 10px;
+    border: 1px solid var(--border); background: var(--card2);
+    color: var(--text); font-size: 0.9rem; outline: none;
+  }
+  .form-row input:focus { border-color: var(--accent); }
+  .form-row input[type="number"] { max-width: 100px; }
+  .quick-adds { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .quick-add {
+    padding: 5px 10px; border-radius: 8px; font-size: 0.75rem;
+    background: var(--card2); border: 1px solid var(--border);
+    color: var(--muted); cursor: pointer;
+  }
+  .quick-add:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Entry list */
+  .entries-card {
+    background: var(--card); border-radius: 16px; padding: 16px;
+    margin-bottom: 16px;
+  }
+  .entries-card h3 { font-size: 0.95rem; margin-bottom: 12px; }
+  .entry {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 0; border-bottom: 1px solid var(--card2);
+  }
+  .entry:last-child { border-bottom: none; }
+  .entry-info .entry-desc { font-size: 0.9rem; }
+  .entry-info .entry-time { font-size: 0.75rem; color: var(--muted); }
+  .entry-right { display: flex; align-items: center; gap: 10px; }
+  .entry-cal { font-weight: 700; font-size: 0.95rem; color: var(--accent); }
+  .delete-btn {
+    background: none; border: none; color: var(--muted); cursor: pointer;
+    font-size: 1.1rem; padding: 2px 4px; border-radius: 4px;
+  }
+  .delete-btn:hover { color: var(--red); }
+  .empty { text-align: center; color: var(--muted); padding: 24px; font-size: 0.9rem; }
+
+  /* Summary */
+  .summary-card {
+    background: var(--card); border-radius: 16px; padding: 16px;
+    margin-bottom: 24px;
+  }
+  .summary-card h3 { font-size: 0.95rem; margin-bottom: 12px; }
+  .summary-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 0; font-size: 0.85rem;
+  }
+  .summary-row .day { color: var(--muted); }
+  .summary-row .cals { font-weight: 600; }
+  .bar-bg {
+    flex: 1; height: 6px; background: var(--card2); border-radius: 3px;
+    margin: 0 12px; overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%; border-radius: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.4s ease;
+  }
+
+  .hidden { display: none !important; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; margin-bottom: 16px; }
+  .tab {
+    flex: 1; padding: 8px; border: none; border-radius: 10px;
+    background: var(--card); color: var(--muted); font-size: 0.85rem;
+    font-weight: 600; cursor: pointer;
+  }
+  .tab.active { background: var(--accent); color: #0f172a; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>🔥 <span>Calorie</span> Counter</h1>
+    <p class="subtitle">Track your daily intake</p>
+  </div>
+
+  <!-- Login Screen -->
+  <div id="loginScreen" class="login-card">
+    <h2>Who's counting?</h2>
+    <input type="text" id="usernameInput" placeholder="Enter your name" maxlength="30" autofocus>
+    <button class="btn btn-primary" onclick="login()">Start Tracking</button>
+  </div>
+
+  <!-- Main App -->
+  <div id="appScreen" class="hidden">
+    <div class="topbar">
+      <div class="user-info">
+        <div class="avatar" id="avatar"></div>
+        <span class="name" id="displayName"></span>
+      </div>
+      <button class="btn btn-sm btn-ghost" onclick="logout()">Switch User</button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="today" onclick="switchTab('today')">Today</button>
+      <button class="tab" data-tab="history" onclick="switchTab('history')">7-Day History</button>
+    </div>
+
+    <!-- Today Tab -->
+    <div id="todayTab">
+      <div class="date-nav">
+        <button onclick="changeDate(-1)">‹</button>
+        <span class="date-label" id="dateLabel"></span>
+        <button onclick="changeDate(1)">›</button>
+      </div>
+
+      <div class="progress-card">
+        <div class="ring-container">
+          <svg viewBox="0 0 180 180" width="160" height="160">
+            <circle class="ring-bg" cx="90" cy="90" r="75"/>
+            <circle class="ring-fill" id="ringFill" cx="90" cy="90" r="75"
+              stroke-dasharray="471.24" stroke-dashoffset="471.24"/>
+          </svg>
+          <div class="ring-text">
+            <div class="cal-number" id="totalCal">0</div>
+            <div class="cal-label">calories</div>
+          </div>
+        </div>
+        <div class="goal-row">
+          <label>Daily goal:</label>
+          <input type="number" class="goal-input" id="goalInput" value="2000"
+            onchange="saveGoal()" min="500" max="10000" step="50">
+          <label>kcal</label>
+        </div>
+      </div>
+
+      <div class="add-card">
+        <h3>➕ Add Entry</h3>
+        <div class="quick-adds">
+          <button class="quick-add" onclick="quickAdd('Coffee',5)">☕ Coffee 5</button>
+          <button class="quick-add" onclick="quickAdd('Apple',95)">🍎 Apple 95</button>
+          <button class="quick-add" onclick="quickAdd('Banana',105)">🍌 Banana 105</button>
+          <button class="quick-add" onclick="quickAdd('Rice bowl',250)">🍚 Rice 250</button>
+          <button class="quick-add" onclick="quickAdd('Chicken breast',165)">🍗 Chicken 165</button>
+          <button class="quick-add" onclick="quickAdd('Salad',150)">🥗 Salad 150</button>
+        </div>
+        <div class="form-row">
+          <input type="text" id="descInput" placeholder="What did you eat?" maxlength="100">
+          <input type="number" id="calInput" placeholder="kcal" min="1" max="9999">
+        </div>
+        <div style="margin-top:8px">
+          <button class="btn btn-primary" onclick="addEntry()">Add</button>
+        </div>
+      </div>
+
+      <div class="entries-card">
+        <h3>📋 Today's Log</h3>
+        <div id="entriesList"></div>
+      </div>
+    </div>
+
+    <!-- History Tab -->
+    <div id="historyTab" class="hidden">
+      <div class="summary-card">
+        <h3>📊 Last 7 Days</h3>
+        <div id="summaryList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentUser = '';
+let currentDate = new Date();
+let goal = 2000;
+
+// Date helpers
+function toDateStr(d) {
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function formatDate(d) {
+  const today = toDateStr(new Date());
+  const ds = toDateStr(d);
+  if (ds === today) return '📅 Today';
+  const y = new Date(); y.setDate(y.getDate()-1);
+  if (ds === toDateStr(y)) return '📅 Yesterday';
+  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+// Login / Logout
+function login() {
+  const name = document.getElementById('usernameInput').value.trim();
+  if (!name) return;
+  currentUser = name;
+  localStorage.setItem('cc_user', name);
+  showApp();
+}
+function logout() {
+  localStorage.removeItem('cc_user');
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('appScreen').classList.add('hidden');
+  document.getElementById('usernameInput').value = '';
+}
+function showApp() {
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('appScreen').classList.remove('hidden');
+  document.getElementById('avatar').textContent = currentUser[0].toUpperCase();
+  document.getElementById('displayName').textContent = currentUser;
+  goal = parseInt(localStorage.getItem('cc_goal_' + currentUser)) || 2000;
+  document.getElementById('goalInput').value = goal;
+  currentDate = new Date();
+  loadEntries();
+}
+
+// Auto-login
+window.onload = () => {
+  const saved = localStorage.getItem('cc_user');
+  if (saved) { currentUser = saved; showApp(); }
+  document.getElementById('usernameInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') login();
+  });
+  document.getElementById('descInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addEntry();
+  });
+  document.getElementById('calInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addEntry();
+  });
+};
+
+// Date navigation
+function changeDate(delta) {
+  const today = toDateStr(new Date());
+  const next = new Date(currentDate);
+  next.setDate(next.getDate() + delta);
+  if (toDateStr(next) > today) return; // no future
+  currentDate = next;
+  loadEntries();
+}
+
+function updateDateLabel() {
+  document.getElementById('dateLabel').textContent = formatDate(currentDate);
+}
+
+// API calls
+async function loadEntries() {
+  updateDateLabel();
+  const date = toDateStr(currentDate);
+  try {
+    const res = await fetch(`/api/entries?username=${encodeURIComponent(currentUser)}&date=${date}`);
+    const data = await res.json();
+    renderEntries(data.entries, data.total);
+  } catch(e) { console.error(e); }
+}
+
+function renderEntries(entries, total) {
+  // Update ring
+  document.getElementById('totalCal').textContent = total.toLocaleString();
+  const pct = Math.min(total / goal, 1.2);
+  const circ = 471.24;
+  const offset = circ - (Math.min(pct, 1) * circ);
+  const ring = document.getElementById('ringFill');
+  ring.style.strokeDashoffset = offset;
+  ring.style.stroke = pct > 1 ? 'var(--red)' : pct > 0.8 ? 'var(--green)' : 'var(--accent)';
+
+  // Render list
+  const list = document.getElementById('entriesList');
+  if (entries.length === 0) {
+    list.innerHTML = '<div class="empty">No entries yet — start logging! 🍽️</div>';
+    return;
+  }
+  list.innerHTML = entries.map(e => {
+    const time = new Date(e.created_at + 'Z').toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    return `<div class="entry">
+      <div class="entry-info">
+        <div class="entry-desc">${esc(e.description)}</div>
+        <div class="entry-time">${time}</div>
+      </div>
+      <div class="entry-right">
+        <span class="entry-cal">${e.calories > 0 ? '+' : ''}${e.calories}</span>
+        <button class="delete-btn" onclick="deleteEntry(${e.id})" title="Delete">×</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+async function addEntry() {
+  const desc = document.getElementById('descInput').value.trim();
+  const cal = parseInt(document.getElementById('calInput').value);
+  if (!desc || !cal) return;
+
+  try {
+    await fetch('/api/entries', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: currentUser,
+        description: desc,
+        calories: cal,
+        date: toDateStr(currentDate)
+      })
+    });
+    document.getElementById('descInput').value = '';
+    document.getElementById('calInput').value = '';
+    loadEntries();
+  } catch(e) { console.error(e); }
+}
+
+function quickAdd(desc, cal) {
+  document.getElementById('descInput').value = desc;
+  document.getElementById('calInput').value = cal;
+  addEntry();
+}
+
+async function deleteEntry(id) {
+  try {
+    await fetch(`/api/entries/${id}?username=${encodeURIComponent(currentUser)}`, { method: 'DELETE' });
+    loadEntries();
+  } catch(e) { console.error(e); }
+}
+
+function saveGoal() {
+  goal = parseInt(document.getElementById('goalInput').value) || 2000;
+  localStorage.setItem('cc_goal_' + currentUser, goal);
+  loadEntries();
+}
+
+// Tabs
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  document.getElementById('todayTab').classList.toggle('hidden', tab !== 'today');
+  document.getElementById('historyTab').classList.toggle('hidden', tab !== 'history');
+  if (tab === 'history') loadSummary();
+}
+
+async function loadSummary() {
+  try {
+    const res = await fetch(`/api/summary?username=${encodeURIComponent(currentUser)}&days=7`);
+    const data = await res.json();
+    const list = document.getElementById('summaryList');
+    if (data.summary.length === 0) {
+      list.innerHTML = '<div class="empty">No data yet for the past week</div>';
+      return;
+    }
+    const maxCal = Math.max(...data.summary.map(s => s.total), goal);
+    list.innerHTML = data.summary.map(s => {
+      const d = new Date(s.date + 'T12:00:00');
+      const dayName = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      const pct = Math.round((s.total / maxCal) * 100);
+      const color = s.total > goal ? 'var(--red)' : 'var(--green)';
+      return `<div class="summary-row">
+        <span class="day" style="min-width:100px">${dayName}</span>
+        <div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div>
+        <span class="cals" style="min-width:60px;text-align:right">${s.total.toLocaleString()}</span>
+      </div>`;
+    }).join('');
+  } catch(e) { console.error(e); }
+}
+</script>
+</body>
+</html>
